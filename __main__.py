@@ -9,7 +9,6 @@ from dotenv import load_dotenv
 TOKEN = os.getenv('DISCORD_TOKEN')
 
 def browiki_search(query):
-    print(query)
     session = requests.Session()
     session.get('https://browiki.org/wiki/')
 
@@ -28,7 +27,6 @@ def browiki_search(query):
     return response.json()[3]
 
 def ragnaplace_search(query):
-    print(query)
     session = requests.Session()
     session.get('https://ragnaplace.com/home')
 
@@ -44,16 +42,16 @@ def ragnaplace_search(query):
     skills = []
     npcs = []
     for i in results['item']['list']:
-        items.append('[![](%s) %s](https://ragnaplace.com/bro/item/%s)' % (i['image']['item'], i['name'], i['id']))
+        items.append('-%s https://ragnaplace.com/bro/item/%s' % (i['name'], i['id']))
     for i in results['monster']['list']:
-        monsters.append('[![](%s) %s](https://ragnaplace.com/bro/mob/%s)' % (i['image']['small'], i['name'], i['id']))
+        monsters.append('-%s https://ragnaplace.com/bro/mob/%s' % (i['name'], i['id']))
     for i in results['skill']['list']:
-        skills.append('[![](%s) %s](https://ragnaplace.com/bro/skill/%s)' % (i['image']['icon'], i['name'], i['id']))
+        skills.append('-%s https://ragnaplace.com/bro/skill/%s' % (i['name'], i['id']['id']))
     for i in results['npc']['list']:
-        npcs.append('[![](%s) %s](https://ragnaplace.com/bro/npc/%s)' % (i['image']['small'], i['name'], i['id']))
+        npcs.append('-%s https://ragnaplace.com/bro/npc/%s' % (i['name'], i['id']))
     for i in results['map']['list']:
-        maps.append('[![](%s) %s](https://ragnaplace.com/bro/map/%s)' % (i['image']['small'], i['name'], i['id']))
-    return (items, monsters, maps, skills, npcs)
+        maps.append('-%s https://ragnaplace.com/bro/map/%s' % (i['name'], i['id']))
+    return items,monsters,maps,skills,npcs
 
 
 help_cmd = re.compile('^!(ajuda|help).*$', re.IGNORECASE)
@@ -75,7 +73,7 @@ async def on_message(message):
         else:
             await channel.send('(─‿‿─) Não encontrei nada na Browiki sobre o assunto')
     if ragnaplace_cmd.match(message_content):
-        (items, monsters, maps, skills, npcs) = browiki_search(ragnaplace_cmd.sub(r'\1',message_content))
+        items,monsters,maps,skills,npcs = ragnaplace_search(ragnaplace_cmd.sub(r'\1',message_content))
         if len(items) > 0:
              await channel.send('٩(˘◡˘)۶ Encontrei a(s) seguinte(s) página(s):\nItens:\n%s' % ('\n'.join(items)))
         if len(monsters) > 0:
