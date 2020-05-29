@@ -67,7 +67,7 @@ async def on_message(message):
     channel = message.channel
     message_content = message.content
     if help_cmd.match(message_content):
-        await channel.send('ᕦ(⩾﹏⩽)ᕥ Como posso ajudá-lo? Para fazer buscas nas bases de ragnarok experimente a lista de comandos abaixo.\nLista de comandos\n```\n!browiki <termo>\n!divinepride <termo>\n!ajuda\n```\nTroque `<termo>` pelo que está buscando. Por exemplo:\n`!browiki Salão de Ymir`')
+        await channel.send('ᕦ(⩾﹏⩽)ᕥ Como posso ajudá-lo? Para fazer buscas nas bases de ragnarok experimente a lista de comandos abaixo.\nLista de comandos\n```\n!browiki <termo>\n!ragnaplace <termo>\n!ajuda\n```\nTroque `<termo>` pelo que está buscando. Por exemplo:\n`!browiki Salão de Ymir`')
     if browiki_cmd.match(message_content):
         results = browiki_search(browiki_cmd.sub(r'\1',message_content))
         if len(results) > 0:
@@ -75,7 +75,7 @@ async def on_message(message):
         else:
             await channel.send('(─‿‿─) Não encontrei nada na Browiki sobre o assunto')
     if ragnaplace_cmd.match(message_content):
-        items, monsters, maps, skills, npcs = browiki_search(ragnaplace_cmd.sub(r'\1',message_content))
+        (items, monsters, maps, skills, npcs) = browiki_search(ragnaplace_cmd.sub(r'\1',message_content))
         if len(items) > 0:
              await channel.send('٩(˘◡˘)۶ Encontrei a(s) seguinte(s) página(s):\nItens:\n%s' % ('\n'.join(items)))
         if len(monsters) > 0:
