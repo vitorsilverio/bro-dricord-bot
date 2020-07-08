@@ -79,11 +79,52 @@ def irowiki_search(query):
         results.append('[%s](http://db.irowiki.org%s)' % (link.text, link['href']))
     return results
 
+def divinepride_search(query):
+    session = requests.Session()
+    
+    headers = {
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+        'Accept-Encoding': 'gzip, deflate',
+        'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7,ja;q=0.6',
+        'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36'
+    }
+
+    params = {
+        'q': query
+    }
+
+    session.headers = headers
+    #Divine-pride uses cookies let get it in home
+    session.get('https://www.divine-pride.net/')
+
+    response = session.get('https://www.divine-pride.net/database/search', params=params)
+    soup = BeautifulSoup(response.content, features='lxml')
+    results = []
+    result_table = soup.select_one('#items')
+    if result_table:
+        for link in result_table.select('a'):
+            results.append('https://www.divine-pride.net%s' % link['href'])
+    result_table = soup.select_one('#skill')
+    if result_table:
+        for link in result_table.select('a'):
+            results.append('https://www.divine-pride.net%s' % link['href'])
+    result_table = soup.select_one('#quest')
+    if result_table:
+        for link in result_table.select('a'):
+            results.append('https://www.divine-pride.net%s' % link['href'])
+    if len(results) > 10:
+        total = len(results)
+        results = results[:10]
+        results.append('E mais %d resultados. Tente especificar mais a busca' % (total - 10))
+    return results
+
+
 
 help_cmd = re.compile('^!(ajuda|help).*$', re.IGNORECASE)
 browiki_cmd = re.compile('^!browiki (.*)$', re.IGNORECASE)
 irowiki_cmd = re.compile('^!irowiki (.*)$', re.IGNORECASE)
 ragnaplace_cmd = re.compile('^!ragnaplace (.*)$', re.IGNORECASE)
+divinepride_cmd = re.compile('^!divinepride (.*)$', re.IGNORECASE)
     
 client = discord.Client()
 
@@ -93,7 +134,19 @@ async def on_message(message):
         channel = message.channel
         message_content = message.content
         if help_cmd.match(message_content):
-            await channel.send('ᕦ(⩾﹏⩽)ᕥ Como posso ajudá-lo? Para fazer buscas nas bases de ragnarok experimente a lista de comandos abaixo.\nLista de comandos\n```\n!browiki <termo>\n!ragnaplace <termo>\n!irowiki <termo>\n!ajuda\n```\nTroque `<termo>` pelo que está buscando. Por exemplo:\n`!browiki Salão de Ymir`')
+            await channel.send("""
+ᕦ(⩾﹏⩽)ᕥ Como posso ajudá-lo? Para fazer buscas nas bases de ragnarok experimente a lista de comandos abaixo.
+Lista de comandos:
+```
+!browiki <termo>
+!ragnaplace <termo>
+!irowiki <termo>
+!divinepride <termo>
+!ajuda
+```
+Troque `<termo>` pelo que está buscando. Por exemplo:
+`!browiki Salão de Ymir`
+""")
         if browiki_cmd.match(message_content):
             results = browiki_search(browiki_cmd.sub(r'\1',message_content))
             if len(results) > 0:
@@ -119,6 +172,12 @@ async def on_message(message):
                 await channel.send(embed=message)
             else:
                 await channel.send('(─‿‿─) Não encontrei nada na irowiki sobre o assunto')
+        if divinepride_cmd.match(message_content):
+            results = divinepride_search(divinepride_cmd.sub(r'\1',message_content))
+            if len(results) > 0:
+                await channel.send('٩(˘◡˘)۶ Encontrei a(s) seguinte(s) página(s):\n%s' % ('\n'.join(results)))
+            else:
+                await channel.send('(─‿‿─) Não encontrei nada no divine-pride sobre o assunto')
     except Exception as e:
         print(e)
 
