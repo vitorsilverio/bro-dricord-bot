@@ -3,3 +3,4 @@ python-dotenv
 requests
 beautifulsoup4
 lxml
+aiohttp>=3.8.6 # not directly required, pinned by Snyk to avoid a vulnerability
